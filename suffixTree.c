@@ -1,44 +1,120 @@
 #include <stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdlib.h>
+#include <string.h>
+#include "suffixTree.h"
 #define MAX_CHAR 256
 
-
-
-
-typedef struct suffix_tree_node
+struct suffix_tree_node
 {
-	struct suffix_tree_node* children[MAX_CHAR];
-	struct suffix_tree_node* suffixLink;
+	struct suffix_tree_node *children[MAX_CHAR];
+	struct suffix_tree_node *suffixLink;
 	int start;
-	int* end;
+	int *pend;
 	int suffixIndex;
-	int isLeaf;
-} SuffixTreeNode;
-
+};
+typedef struct suffix_env
+{
+	SuffixTreeNode *proot;
+	SuffixTreeNode *pactive_node;
+	int active_length;
+	int active_edge_index;
+	char *in_s;
+	int *pend;
+	int remaining_suffix_count;
+} SuffixEnv;
 typedef struct suffix_active_point
 {
-	SuffixTreeNode* activeNode;
+	SuffixTreeNode *activeNode;
 	int activeLength;
 	char activeTree;
 } ActivePoint;
+SuffixTreeNode *CreateNode(int startm, int *pend);
+void ExtendSuffixTree(SuffixEnv *penv, int phase);
+int WalkDown(SuffixEnv *penv);
 
-
-
-
-SuffixTreeNode* create_node(int start, int * end)
+SuffixTreeNode *SuffixTreeConstruct(char in_str[])
 {
-	SuffixTreeNode* node = (SuffixTreeNode*)malloc(sizeof(SuffixTreeNode));
-	node->start =start;
-	node->end = end;
+}
+int WalkDown(SuffixEnv *penv)
+{
+	SuffixTreeNode *next_node = penv->pactive_node->children[(int)penv->in_s[penv->active_edge_index]];
+	int length = *(next_node->pend) - next_node->start;
+	if (penv->active_length >= length)
+	{
+		penv->pactive_node = next_node;
+		penv->active_length -= length;
+		penv->active_edge_index += length;
+		return 1;
+	}
+	return 0;
+}
+void ExtendSuffixTree(SuffixEnv *penv, int phase)
+{
+	if (penv == NULL)
+		return;
+	if (penv->in_s == NULL)
+		return;
+	++penv->remaining_suffix_count;
+	++penv->pend; // end move to next character
+	while (penv->remaining_suffix_count > 0)
+	{
+		char current_char = penv->in_s[phase];
+		char current_edge = penv->in_s[penv->pactive_node->start];
+		if (penv->active_length == 0) // APCFZ
+		{
+			current_edge = current_char;
+		}
+		if (penv->pactive_node->children[(int)current_edge] == NULL)
+		{
+			// apply rule 2: create new node
+			SuffixTreeNode *new_node = CreateNode(phase, penv->pend);
+			new_node->suffixLink = penv->proot;
+			penv->pactive_node->children[(int)current_edge] = new_node;
+		}
+		else
+		{
+			if (WalkDown(penv))
+				continue;
+			
+			// apply rule 3: break loop
+			if (penv->in_s[penv->pactive_node->start + penv->active_length] == current_char) 
+			{
+				break;
+			}
+			// apply rule2: create new node
+			int * psplit_node_end =(int*)malloc(sizeof(int));
+			*psplit_node_end =penv->pactive_node->start + penv->active_length -1 ;
+			SuffixTreeNode* split_node = CreateNode(penv->pactive_node->start, psplit_node_end);
+			SuffixTreeNode* next_node = penv->pactive_node->children[(int)(penv->in_s[penv->active_edge_index])];
+			penv->pactive_node->children[(int)(penv->in_s[penv->active_edge_index])] = split_node;
+			split_node->children[(int)(penv->in_s[penv->pactive_node->start + penv->active_length])] = next_node;
+
+			SuffixTreeNode* new_node = CreateNode(phase, penv->pend);
+			split_node->children[(int)(penv->in_s[phase])] = new_node;
+
+			split_node->suffixLink = penv->proot;
+		}
+		-- penv->remaining_suffix_count;
+	}
+}
+SuffixTreeNode *CreateNode(int start, int *pointer_end)
+{
+	SuffixTreeNode *node = (SuffixTreeNode *)malloc(sizeof(SuffixTreeNode));
+	node->start = start;
+	node->pend = pointer_end;
 	node->suffixIndex = -1;
 	node->suffixLink = NULL;
-	for(int i = 0; i < MAX_CHAR; ++i)
+	for (int i = 0; i < MAX_CHAR; ++i)
 	{
 		node->children[i] = NULL;
 	}
-	node->isLeaf = 1;
 	return node;
+}
+
+/*
+SuffixTreeNode* create_node(int start, int * end)
+{
+	
 }
 int edge_length(SuffixTreeNode* node)
 {
@@ -206,3 +282,5 @@ int main(int argc, char* argv[])
 	char text[] = "abcabxabcd$";
 	construct_suffix_tree(text, (int)strlen(text));
 }
+
+*/
