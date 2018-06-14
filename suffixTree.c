@@ -34,6 +34,13 @@ int WalkDown(SuffixEnv *penv);
 
 SuffixTreeNode *SuffixTreeConstruct(char in_str[])
 {
+	SuffixEnv * penv= (SuffixEnv*)malloc(sizeof(int));
+	int *pend = (int*)malloc(sizeof(int));
+	*pend = -1;
+	penv->pend = pend;
+	
+
+
 }
 int WalkDown(SuffixEnv *penv)
 {
@@ -56,11 +63,12 @@ void ExtendSuffixTree(SuffixEnv *penv, int phase)
 		return;
 	++penv->remaining_suffix_count;
 	++penv->pend; // end move to next character
+	SuffixTreeNode* lastNewNode = NULL;
 	while (penv->remaining_suffix_count > 0)
 	{
 		char current_char = penv->in_s[phase];
 		char current_edge = penv->in_s[penv->pactive_node->start];
-		if (penv->active_length == 0) // APCFZ
+		if (penv->active_length == 0) // APCFZ rule 1
 		{
 			current_edge = current_char;
 		}
@@ -93,8 +101,25 @@ void ExtendSuffixTree(SuffixEnv *penv, int phase)
 			split_node->children[(int)(penv->in_s[phase])] = new_node;
 
 			split_node->suffixLink = penv->proot;
+
+			if(lastNewNode != NULL)
+			{
+				lastNewNode->suffixLink = split_node;
+				lastNewNode = NULL;
+			}
+			lastNewNode = split_node;
 		}
 		-- penv->remaining_suffix_count;
+
+		if(penv->pactive_node == penv->proot && penv->active_length > 0)
+		{
+			penv->active_length --;
+			penv->active_edge_index = phase - penv->remaining_suffix_count + 1;
+		}
+		else if(penv->pactive_node != penv->proot)
+		{
+			penv->pactive_node = penv->pactive_node->suffixLink;
+		}
 	}
 }
 SuffixTreeNode *CreateNode(int start, int *pointer_end)
