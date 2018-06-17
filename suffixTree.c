@@ -31,16 +31,96 @@ typedef struct suffix_active_point
 SuffixTreeNode *CreateNode(int startm, int *pend);
 void ExtendSuffixTree(SuffixEnv *penv, int phase);
 int WalkDown(SuffixEnv *penv);
+int GetEdgeLength(SuffixTreeNode* node)
+{
+	return *node->pend - node->start + 1;
+}
+void SetSuffixIndexByDFS(SuffixTreeNode* penv, int label_height, char in_s[]);
+void FreeSuffixTree(SuffixTreeNode* penv);
 
 SuffixTreeNode *SuffixTreeConstruct(char in_str[])
 {
-	SuffixEnv * penv= (SuffixEnv*)malloc(sizeof(int));
-	int *pend = (int*)malloc(sizeof(int));
-	*pend = -1;
-	penv->pend = pend;
+	SuffixEnv *penv= (SuffixEnv*)malloc(sizeof(SuffixEnv));	
+	penv->pend = (int*)malloc(sizeof(int));
+	*(penv->pend) = -1;
+	printf("%d\n", *(penv->pend));
+	int * rootEnd = (int*)malloc(sizeof(int));
+	*rootEnd = -1;
+	SuffixTreeNode* proot = CreateNode(-1, rootEnd);
+	penv->proot = proot;
+	penv->pactive_node = proot;
+	penv->active_length = 0;
+	penv->active_edge_index = -1;
+	penv->in_s = in_str;
+	penv->remaining_suffix_count = 0;
+
+	for(int i = 0; i < strlen(in_str); ++i)
+	{
+		ExtendSuffixTree(penv, i);
+	}
+
+	SetSuffixIndexByDFS(penv->proot, 0, penv->in_s);
+
+	FreeSuffixTree(penv->proot);
+	free(penv->pend);
+	free(penv);
+}
+void FreeSuffixTree(SuffixTreeNode *pnode)
+{
+	if(pnode == NULL) return;
+
+	int i = 0;
+	for(i = 0; i < MAX_CHAR; ++i)
+	{
+		if(pnode->children[i] != NULL)
+		{
+			FreeSuffixTree(pnode->children[i]);
+		}
+	}
+	if(pnode->suffixIndex == -1)
+	{
+		free(pnode->pend);
+	}
+	free(pnode);
 	
+}
+void print(int i, int j, char in_s[])
+{
+	int k;
+	for(k =i; k <=j; ++k)
+	{
+		printf("%c", in_s[k]);
+	}
+}
 
+void SetSuffixIndexByDFS(SuffixTreeNode* node, int label_height, char in_s[])
+{
+	if(node == NULL) return;
 
+	if(node->start != -1)
+	{
+		print(node->start,  *(node->pend), in_s);
+	}
+	int leaf =1;
+	for(int i = 0; i< MAX_CHAR; ++i)
+	{
+		if(node->children[i] != NULL)
+		{
+			if(leaf == 1 && node->start != -1)
+			{
+				printf(" [%d]\n", node->suffixIndex);
+			}
+
+			leaf = 0;
+			SetSuffixIndexByDFS(node->children[i],label_height + GetEdgeLength(node->children[i]), in_s);			
+		}
+	}
+	if(leaf == 1)
+	{
+		node->suffixIndex = label_height -1;
+		printf(" [%d]\n", node->suffixIndex);
+	}
+	
 }
 int WalkDown(SuffixEnv *penv)
 {
@@ -62,16 +142,17 @@ void ExtendSuffixTree(SuffixEnv *penv, int phase)
 	if (penv->in_s == NULL)
 		return;
 	++penv->remaining_suffix_count;
-	++penv->pend; // end move to next character
+	*penv->pend = *(penv->pend) + 1 ;// end move to next character
 	SuffixTreeNode* lastNewNode = NULL;
 	while (penv->remaining_suffix_count > 0)
 	{
 		char current_char = penv->in_s[phase];
-		char current_edge = penv->in_s[penv->pactive_node->start];
 		if (penv->active_length == 0) // APCFZ rule 1
 		{
-			current_edge = current_char;
+			//current_edge = current_char;
+			penv->active_edge_index = phase;
 		}
+		char current_edge = penv->in_s[penv->active_edge_index];
 		if (penv->pactive_node->children[(int)current_edge] == NULL)
 		{
 			// apply rule 2: create new node

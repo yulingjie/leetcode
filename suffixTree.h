@@ -2,5 +2,5 @@
 #define __SUFFIX_TREE_H__
 typedef struct suffix_tree_node SuffixTreeNode;
 
-SuffixTreeNode* SuffixTreeContruct(char in_str[]);
+SuffixTreeNode* SuffixTreeConstruct(char in_str[]);
 #endif
