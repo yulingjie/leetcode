@@ -26,7 +26,7 @@ SuffixEnv * pointer_env;
 SuffixTreeNode *CreateNode(int startm, int *pend);
 void ExtendSuffixTree(SuffixEnv *penv, int phase);
 int WalkDown(SuffixEnv *penv);
-
+int SuffixTreeTraverseEdge(char* str,int idx, int start, int end, char in_str[]);
 void SetSuffixIndexByDFS(SuffixTreeNode* penv, int label_height, char in_s[]);
 void FreeSuffixTree(SuffixTreeNode* penv);
 int GetEdgeLength(SuffixTreeNode* node)
@@ -118,7 +118,7 @@ void SetSuffixIndexByDFS(SuffixTreeNode* node, int label_height, char in_s[])
 	}
 	if(leaf == 1)
 	{
-		node->suffixIndex = label_height -1;
+		node->suffixIndex = strlen(in_s) - label_height;
 		printf(" [%d]\n", node->suffixIndex);
 	}
 	
@@ -233,177 +233,48 @@ SuffixTreeNode *CreateNode(int start, int *pointer_end)
 	}
 	return node;
 }
-
-/*
-SuffixTreeNode* create_node(int start, int * end)
+int SuffixTreeTraverseEdge(char* str,int idx, int start, int end, char in_str[])
 {
-	
-}
-int edge_length(SuffixTreeNode* node)
-{
-	return *(node->end) - node->start + 1;
-}
-void print(int i, int j, char* S)
-{
-	int k;
-	for(k = i; k <=j; ++k)
+	int k = 0;
+	for(k = start; k <= end && str[idx] != '\0'; ++k, ++idx)
 	{
-		printf("%c", S[k]);
-	}
-}
-void set_suffix_index_by_dfs(SuffixTreeNode* node, int labelHeight,char *S,int size)
-{
-	if(node == NULL) return;
-	
-	if(node->start != -1)
-	{
-		print(node->start, *(node->end), S);
-	}
-	int leaf = 1;
-	int i ;
-	for(i = 0; i < MAX_CHAR; ++i)
-	{
-		if(node->children[i] != NULL)
+		if(in_str[k] != str[idx])
 		{
-			if(leaf == 1&& node->start != -1)
-			{
-				printf(" [%d]\n", node->suffixIndex);
-			} 
-			
-			leaf = 0;
-			set_suffix_index_by_dfs(node->children[i], 
-			labelHeight + edge_length(node->children[i]),S, size);
+			return -1;
 		}
 	}
-	if( leaf == 1)
+	if(str[idx] == '\0')
 	{
-		node->suffixIndex = size - labelHeight;
-		printf(" [%d]\n", node->suffixIndex);
-	}
-}
-void free_suffix_tree_by_post_order(SuffixTreeNode* node)
-{
-	if(node == NULL) return;
-	int i ;
-	for(i = 0; i < MAX_CHAR; ++i)
-	{
-		if(node->children[i] != NULL)
-		{
-			free_suffix_tree_by_post_order(node->children[i]);
-		}
-	}
-	if(node->suffixIndex == -1)
-	{
-		free(node->end);
-	}
-	free(node);
-}
-int walk_down(ActivePoint* ap,SuffixTreeNode* node, char * S)
-{
-	if(ap->activeLength >= edge_length(node))
-	{
-		ap->activeNode = node;
-		ap->activeLength -= edge_length(node);
-		ap->activeTree = S[*(node->end) + 1];
 		return 1;
 	}
 	return 0;
 }
 
-void construct_suffix_tree(char* s, int size)
+int SuffixTreeDoTraversal(SuffixTreeNode* node, char* str, int idx, char in_str[], SuffixTreeNode** pointer_return_node)
 {
-	
-	char* S = s;
-	int* endPos = (int*)malloc(sizeof(int));
-	*endPos = 0;
-	
-	int * rootEnd = (int*)malloc(sizeof(int));
-	*rootEnd = -1;
-	
-	SuffixTreeNode* root = create_node(-1, rootEnd);
-	
-	ActivePoint* ap= (ActivePoint*) malloc(sizeof(ActivePoint));
-	ap->activeNode = root;
-	ap->activeLength = 0;
-	ap->activeTree = '\0';
-	int phase = 0;
-	int remainingSuffixCount = 0;
-	
-	SuffixTreeNode* lastNewNode = NULL;
-	
-	while(S[phase] != '\0')
-	{
-		*endPos = phase;
-		++ remainingSuffixCount;
-		while(remainingSuffixCount > 0)
-		{
-			if(ap->activeLength == 0) ap->activeTree = S[phase];
+	 if(node == NULL)
+    {
+        return -1;
+    }
+    int res = -1;
+    if(node->start != -1)
+    {
+        res = SuffixTreeTraverseEdge(str, idx, node->start, *(node->pend), in_str);
+        if(res != 0)
+        {
+			if(pointer_return_node != NULL)
+			{
+				*pointer_return_node = node;
+			}
 			
-			if(ap->activeNode->children[ap->activeTree] == NULL)
-			{
-				ap->activeNode->children[ap->activeTree] = create_node(phase,endPos);
-				
-				if(lastNewNode != NULL)
-				{
-					lastNewNode ->suffixLink = ap->activeNode;
-					lastNewNode = NULL;
-				}
-			}
-			else
-			{
-				SuffixTreeNode* next = ap->activeNode->children[ap->activeTree];
-				if(walk_down(ap, next, S)) continue;
-				
-				if(S[next->start + ap->activeLength] == S[phase])
-				{
-					if(lastNewNode != NULL && ap->activeNode != root)
-					{
-						lastNewNode -> suffixLink = ap->activeNode;
-						lastNewNode = NULL;
-					}
-					++ap->activeLength;
-					break;
-				}
-				
-				int* splitEnd = (int*)malloc(sizeof(int));
-				*splitEnd = next->start + ap->activeLength - 1;
-				SuffixTreeNode* splitNode = create_node(next->start, splitEnd);
-				ap->activeNode->children[ap->activeTree] = splitNode;
-				
-				splitNode->children[S[phase]] = create_node(phase, endPos);
-				next->start += ap->activeLength;
-				splitNode->children[S[next->start]] = next;
-				
-				if(lastNewNode != NULL)
-				{
-					lastNewNode->suffixLink = splitNode;
-				}
-				
-				lastNewNode = splitNode;
-			}
-			-- remainingSuffixCount;
-			if(ap->activeNode == root && ap->activeLength > 0)
-			{
-				-- ap->activeLength;
-				ap->activeTree = S[phase - remainingSuffixCount + 1];
-			}else if(ap->activeNode != root)
-			{
-				ap->activeNode = ap->activeNode->suffixLink;
-			}
-		}
-		++ phase;
-	}
-	int labelHeight = 0;
-	set_suffix_index_by_dfs(root, labelHeight,s, size);
-	
-	free_suffix_tree_by_post_order(root);
-
-	
-}
-int main(int argc, char* argv[])
-{
-	char text[] = "abcabxabcd$";
-	construct_suffix_tree(text, (int)strlen(text));
+            return res;
+        }
+    }
+    idx += GetEdgeLength(node);
+    if(node->children[str[idx]] != NULL)
+    {
+        return SuffixTreeDoTraversal(node->children[str[idx]],str,idx,in_str, pointer_return_node);
+    }
+    return -1;
 }
 
-*/

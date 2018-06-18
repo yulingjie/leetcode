@@ -15,4 +15,6 @@ struct suffix_tree_node
 int GetEdgeLength(SuffixTreeNode* node);
 SuffixTreeNode* SuffixTreeConstruct(char in_str[]);
 void SuffixTreeFree();
+
+int SuffixTreeDoTraversal(SuffixTreeNode* node, char* str, int idx, char in_str[], SuffixTreeNode** pointer_return_node);
 #endif
