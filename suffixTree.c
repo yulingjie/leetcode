@@ -38,8 +38,7 @@ SuffixTreeNode *SuffixTreeConstruct(char in_str[])
 {
 	SuffixEnv *penv= (SuffixEnv*)malloc(sizeof(SuffixEnv));	
 	penv->pend = (int*)malloc(sizeof(int));
-	*(penv->pend) = -1;
-	printf("%d\n", *(penv->pend));
+	*(penv->pend) = -1;	
 	int * rootEnd = (int*)malloc(sizeof(int));
 	*rootEnd = -1;
 	SuffixTreeNode* proot = CreateNode(-1, rootEnd);
