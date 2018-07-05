@@ -171,7 +171,7 @@ void findLongestCommonStr(char in_str1[], char in_str2[])
 
 int main(int argc, char* argv[])
 {
-    char in_str1[] = "xabxa#";
-    char in_str2[] = "babxba$";
+    char in_str1[] = "cabbaabb#";
+    char in_str2[] = "bbaabbac$";
     findLongestCommonStr(in_str1, in_str2);
 }

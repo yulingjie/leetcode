@@ -47,7 +47,7 @@ void find_longest_repeated_str(char in_str[])
 int main(int argc, char* argv[])
 {
 
-    char str[] = "ABABABA$";
+    char str[] = "cabbaabb#$";
     find_longest_repeated_str(str);
     
 
