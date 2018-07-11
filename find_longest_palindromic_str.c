@@ -144,8 +144,14 @@ void findLPS(char str[])
     printf("\n");
     freeNodeDPS(node);
 }
+
+
+
+
 int main(int argc, char* argv[])
 {
-    char str[] = "abcde";
+    char str[] = "forgeeksskeegfor";
     findLPS(str);
 }
+
+
