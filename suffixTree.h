@@ -10,6 +10,10 @@ struct suffix_tree_node
 	int start;
 	int *pend;
 	int suffixIndex;
+#ifdef	SUFFIX_FORWARD_REVERSE
+	int* pforwardIndices;
+	int* preverseIndices;
+#endif
 };
 
 int GetEdgeLength(SuffixTreeNode* node);
