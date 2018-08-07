@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include "util.h"
 int isCharNumber(char c)
 {
     return ((int)c >= (int)'0') && ((int)c <= (int)'9');
@@ -81,9 +82,9 @@ int str2int(char* in_str)
     return rt ;
 }
 
-int main(int argc,  char* argv[])
+/*int main(int argc,  char* argv[])
 {
     char * str = "   0+1 42";
     int rt = str2int(str);
     printf("%d\n", rt);
-}
+}*/
