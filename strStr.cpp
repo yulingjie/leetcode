@@ -6,7 +6,16 @@ using std::cout;
 using std::endl;
 class Solution{
     public:
+        // prefix tree
         int strStr(string haystack, string needle)
+        {
+            return -1;
+        }
+        //
+        //     -____-
+        // ____-____-____________________
+        //
+        int strStr1(string haystack, string needle)
         {
             if(needle.length() == 0) return 0;
             if(needle.length() > haystack.length()) return -1;

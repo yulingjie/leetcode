@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+class Solution
+{
+    public:
+        vector<int> spiralOrder(vector<vector<int>>& matrix)
+        {
+            vector<int> vec;
+            int i = 0; 
+            int j = 0;
+            int n = matrix.size() * matrix[0].size();
+            int wl = -1; 
+            int wr = matrix[0].size();
+            int ht = matrix.size();
+            int hb = -1;
+            int status = 0;
+            const int RIGHT = 1;
+            const int DOWN = 2;
+            const int LEFT = 3;
+            const int UP = 4;
+            status = RIGHT;
+            while(n > 0)
+            {
+                cout<<matrix[i][j];
+
+                // probe next
+                bool bnext = false;
+                if(status == RIGHT)
+                {
+                    bnext = j < w-1;
+                }
+
+                if(j <  w)
+                {
+                    j++;
+                }
+            }
+            return vec;
+        }
+
+};
+
+int main(int argc, char *argv[])
+{
+    
+    return 0;
+}
